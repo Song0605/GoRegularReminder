@@ -28,6 +28,9 @@ func main() {
 	if nowNum == -1 {
 		return
 	}
+	if nowNum == maxNum && time.Now().Minute() > 30 {
+		return
+	}
 	_time := timeArr[nowNum]
 	// fmt.Println("_time =", _time)
 	c := cron.New(cron.WithSeconds())
