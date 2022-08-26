@@ -12,8 +12,8 @@ import (
 )
 
 func main() {
-	//Modify:2022年8月26日14:05:48 ver 0.1
-	fmt.Println("钉钉喝水提醒小助手 ver_0.1")
+	fmt.Println("钉钉喝水提醒小助手 ver_0.2")
+	fmt.Println("最后更新时间:2022年8月26日18:15:28")
 	weekDay := time.Now().Weekday()
 	if weekDay == 6 || weekDay == 7 {
 		fmt.Println("周末就别加班了啊靓仔！~")
