@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"time"
@@ -12,11 +12,16 @@ import (
 )
 
 func main() {
+	PostQYWX("测试消息。")
+	//RegularRemind()
+}
+
+func RegularRemind() {
 	fmt.Println("钉钉喝水提醒小助手 ver_0.3")
 	fmt.Println("最后更新时间:2022年8月30日09:08:44")
 	weekDay := time.Now().Weekday()
 	if weekDay == 6 || weekDay == 7 {
-		fmt.Println("周末就别加班了啊靓仔！~")
+		fmt.Println("周末就别加班了啊靓仔！")
 		select {}
 	}
 	var timeArr = [...]int{9, 10, 11, 13, 14, 15, 16, 17}
@@ -60,10 +65,14 @@ func main() {
 	c.AddFunc("00 * * * * ?", func() {
 		now := time.Now()
 		fmt.Println("现在时间：", now.Hour(), ":", now.Minute())
-		if strconv.Itoa(now.Minute()) == minute && strconv.Itoa(now.Hour()) == hour {
-			atAll := "true"
-			text := "诸君，是时候了！饮下今天的第" + strconv.Itoa(nowNum+1) + "杯水吧！"
-			PostDingDing(text, atAll)
+		text := ""
+		if strconv.Itoa(now.Minute()) == minute &&
+			strconv.Itoa(now.Hour()) == hour {
+			//text := "测试消息。"
+			//atAll := "true"
+			//PostDingDing(text, atAll)
+			text = "喝水提醒小助手提醒您，该喝今天的第" + strconv.Itoa(nowNum+1) + "杯水了。"
+			PostQYWX(text)
 			fmt.Println("已发送")
 			if nowNum == maxNum {
 				c.Stop()
@@ -83,16 +92,49 @@ func main() {
 	select {}
 }
 
+// JsonType
+var JsonType = "application/json;charset=utf-8"
+
+// 钉钉Url
+var DingDingUrl = "https://oapi.dingtalk.com/robot/send?access_token=c74ed8c3a605f20838dd6278daa43f733a6fa077166c10bb05e80d173ec32613"
+
+// 向钉钉发送消息
 func PostDingDing(text string, atAll string) {
 	fmt.Println()
 	fmt.Println(text)
 	body := "{\"at\":{\"isAtAll\":" + atAll + "},\"text\":{\"content\":\"" + text + "\"},\"msgtype\":\"text\"}"
-	res, err := http.Post("https://oapi.dingtalk.com/robot/send?access_token=c74ed8c3a605f20838dd6278daa43f733a6fa077166c10bb05e80d173ec32613", "application/json;charset=utf-8", bytes.NewBuffer([]byte(body)))
+	res, err := http.Post(
+		DingDingUrl,
+		JsonType,
+		bytes.NewBuffer([]byte(body)))
 	if err != nil {
 		fmt.Println("Error!\n", err.Error())
 	}
 	defer res.Body.Close()
-	content, err := ioutil.ReadAll(res.Body)
+	content, err := io.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println("Error!\n", err.Error())
+	}
+	fmt.Println("接口返回值：", string(content))
+}
+
+// 企业微信Url
+var QYWXTestUrl = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=3a5066fa-8218-4f2a-b0e7-e3d0eb4351bc"
+
+// 向企业微信发送消息
+func PostQYWX(text string) {
+	fmt.Println()
+	fmt.Println(text)
+	body := "{\"text\":{\"content\":\"" + text + "\"},\"msgtype\":\"text\"}"
+	res, err := http.Post(
+		QYWXTestUrl,
+		JsonType,
+		bytes.NewBuffer([]byte(body)))
+	if err != nil {
+		fmt.Println("Error!\n", err.Error())
+	}
+	defer res.Body.Close()
+	content, err := io.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println("Error!\n", err.Error())
 	}
