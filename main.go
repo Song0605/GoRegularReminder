@@ -12,8 +12,8 @@ import (
 )
 
 func main() {
-	PostQYWX("测试消息。")
-	//RegularRemind()
+	//PostQYWX("测试消息。")
+	RegularRemind()
 }
 
 func RegularRemind() {
